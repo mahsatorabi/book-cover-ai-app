@@ -1,0 +1,20 @@
+name = "book-cover-ai-app"
+main = "src/worker.js"
+compatibility_date = "2026-07-09"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "bookdb"
+database_id = "6a5cdd76-f927-4d30-be17-5de97a37ca42"
+
+# Enable R2 in Cloudflare Dashboard, create bucket "book-covers", then uncomment:
+# [[r2_buckets]]
+# binding = "BOOK_COVERS"
+# bucket_name = "book-covers"
+
+[ai]
+binding = "AI"

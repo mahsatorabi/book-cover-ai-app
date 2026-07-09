@@ -1,0 +1,1366 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>سامانه ثبت کتاب با هوش مصنوعی</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f7f3ff;
+        --bg-2: #eef8ff;
+        --card: rgba(255, 255, 255, 0.78);
+        --card-strong: rgba(255, 255, 255, 0.92);
+        --primary: #7c4dff;
+        --primary-hover: #6937f2;
+        --secondary: #ff6fb5;
+        --accent: #4ecdc4;
+        --border: rgba(171, 153, 255, 0.22);
+        --text: #241f3d;
+        --muted: #6d678b;
+        --shadow: 0 18px 40px rgba(98, 67, 188, 0.14);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Vazirmatn", Tahoma, Arial, sans-serif;
+        background:
+          radial-gradient(circle at top right, rgba(255, 111, 181, 0.18), transparent 28%),
+          radial-gradient(circle at top left, rgba(78, 205, 196, 0.18), transparent 22%),
+          linear-gradient(180deg, var(--bg-2) 0%, var(--bg) 220px);
+        color: var(--text);
+      }
+      button,
+      input,
+      textarea,
+      select {
+        font-family: inherit;
+      }
+      .container {
+        max-width: 1160px;
+        margin: 28px auto;
+        padding: 0 14px;
+      }
+      .hero {
+        background:
+          linear-gradient(135deg, rgba(124, 77, 255, 0.95), rgba(255, 111, 181, 0.82));
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        border-radius: 28px;
+        padding: 28px;
+        margin-bottom: 18px;
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+        color: #fff;
+      }
+      .hero::after {
+        content: "";
+        position: absolute;
+        width: 320px;
+        height: 320px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.2), transparent 68%);
+        left: -80px;
+        top: -140px;
+      }
+      .hero::before {
+        content: "";
+        position: absolute;
+        width: 220px;
+        height: 220px;
+        border-radius: 40px;
+        transform: rotate(24deg);
+        background: rgba(255, 255, 255, 0.08);
+        left: 24px;
+        bottom: -80px;
+      }
+      .hero h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: -0.3px;
+        position: relative;
+        z-index: 1;
+      }
+      .hero .muted {
+        color: rgba(255, 255, 255, 0.9);
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 13px;
+        margin: 0;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        gap: 14px;
+      }
+      .sidebar,
+      .panel {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+      }
+      .sidebar {
+        padding: 14px;
+        height: fit-content;
+        box-shadow: var(--shadow);
+      }
+      .step-btn {
+        width: 100%;
+        border: 1px solid rgba(124, 77, 255, 0.08);
+        background: rgba(255, 255, 255, 0.45);
+        color: var(--text);
+        border-radius: 18px;
+        padding: 14px;
+        text-align: right;
+        cursor: pointer;
+        margin-bottom: 8px;
+        font-size: 14px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      }
+      .step-btn.active {
+        background: linear-gradient(135deg, rgba(124, 77, 255, 0.16), rgba(255, 111, 181, 0.16));
+        border-color: rgba(124, 77, 255, 0.25);
+        color: #5b2ee2;
+        font-weight: bold;
+      }
+      .panel {
+        padding: 22px;
+        box-shadow: var(--shadow);
+      }
+      .section {
+        display: none;
+      }
+      .section.active {
+        display: block;
+      }
+      .section h2 {
+        margin-top: 0;
+      }
+      .card {
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 18px;
+        background: var(--card-strong);
+        box-shadow: 0 10px 24px rgba(56, 42, 117, 0.08);
+      }
+      .row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+      label {
+        display: block;
+        font-size: 13px;
+        margin-bottom: 6px;
+      }
+      input,
+      textarea,
+      select,
+      button {
+        width: 100%;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        padding: 12px 14px;
+        font-size: 14px;
+      }
+      input,
+      textarea,
+      select {
+        background: rgba(255, 255, 255, 0.78);
+        color: var(--text);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+      }
+      input:focus,
+      textarea:focus,
+      select:focus {
+        outline: none;
+        border-color: rgba(124, 77, 255, 0.5);
+        box-shadow: 0 0 0 4px rgba(124, 77, 255, 0.12);
+      }
+      button {
+        border: none;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: #fff;
+        cursor: pointer;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+        box-shadow: 0 10px 18px rgba(124, 77, 255, 0.22);
+      }
+      button:hover {
+        filter: brightness(1.02);
+        transform: translateY(-1px);
+        box-shadow: 0 14px 24px rgba(124, 77, 255, 0.28);
+      }
+      button.secondary {
+        background: linear-gradient(135deg, #5f6c86, #7c88a2);
+      }
+      button.danger {
+        background: linear-gradient(135deg, #f05a6b, #df3950);
+      }
+      button.light {
+        background: linear-gradient(135deg, rgba(238, 243, 255, 0.95), rgba(255, 245, 252, 0.95));
+        color: #5b2ee2;
+        border: 1px solid rgba(124, 77, 255, 0.18);
+        box-shadow: none;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .actions button {
+        width: auto;
+        min-width: 140px;
+      }
+      .preview-box {
+        margin-top: 10px;
+        border: 1px dashed rgba(124, 77, 255, 0.28);
+        border-radius: 18px;
+        padding: 12px;
+        background: linear-gradient(135deg, rgba(248, 244, 255, 0.95), rgba(242, 251, 255, 0.95));
+      }
+      img#preview {
+        max-width: 260px;
+        border-radius: 18px;
+        border: 1px solid rgba(124, 77, 255, 0.16);
+        display: none;
+        box-shadow: 0 16px 28px rgba(79, 64, 152, 0.16);
+      }
+      pre {
+        white-space: pre-wrap;
+        background: linear-gradient(135deg, rgba(250, 251, 255, 0.95), rgba(246, 242, 255, 0.95));
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 14px;
+        max-height: 260px;
+        overflow: auto;
+      }
+      details summary {
+        cursor: pointer;
+        color: #5b2ee2;
+        font-weight: bold;
+      }
+      .book-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+      }
+      .book-table th,
+      .book-table td {
+        border-bottom: 1px solid rgba(171, 153, 255, 0.14);
+        padding: 12px 10px;
+        text-align: right;
+        font-size: 13px;
+      }
+      .book-table th {
+        color: #5b5381;
+        background: linear-gradient(135deg, rgba(243, 238, 255, 0.96), rgba(237, 248, 255, 0.96));
+      }
+      .book-table tr:hover td {
+        background: rgba(250, 247, 255, 0.95);
+      }
+      .book-cover-thumb {
+        width: 48px;
+        height: 64px;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 1px solid rgba(124, 77, 255, 0.14);
+        box-shadow: 0 8px 14px rgba(91, 46, 226, 0.12);
+      }
+      .status-chip {
+        display: inline-block;
+        border-radius: 999px;
+        background: linear-gradient(135deg, rgba(78, 205, 196, 0.16), rgba(124, 77, 255, 0.16));
+        color: #3c2b85;
+        font-size: 12px;
+        padding: 7px 12px;
+        margin-bottom: 8px;
+        border: 1px solid rgba(124, 77, 255, 0.14);
+      }
+      .row-actions {
+        display: flex;
+        gap: 6px;
+      }
+      .row-actions button {
+        min-width: 0;
+        width: auto;
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+      .section h2 {
+        font-size: 22px;
+        color: #3e2c80;
+        font-weight: 800;
+      }
+      .hero-badges {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+        position: relative;
+        z-index: 1;
+      }
+      .hero-badge {
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        font-size: 12px;
+      }
+      .error-box {
+        color: #b42318;
+        background: #fff1f0;
+        border: 1px solid #f3b5b0;
+        border-radius: 14px;
+        padding: 10px 12px;
+        margin-top: 8px;
+        font-size: 13px;
+      }
+      .mobile-nav {
+        display: none;
+      }
+      .book-cards {
+        display: none;
+      }
+      .book-card {
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 14px;
+        margin-bottom: 10px;
+        background: rgba(255, 255, 255, 0.92);
+      }
+      .book-card h4 {
+        margin: 0 0 8px;
+        font-size: 15px;
+      }
+      .book-card .meta {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.7;
+      }
+      .sticky-actions {
+        position: sticky;
+        bottom: 0;
+        background: linear-gradient(180deg, rgba(247, 243, 255, 0), rgba(247, 243, 255, 0.96) 24%);
+        padding-top: 10px;
+        margin-top: 12px;
+      }
+      @media (max-width: 940px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .sidebar {
+          display: none;
+        }
+        .mobile-nav {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 8px;
+          position: sticky;
+          top: 0;
+          z-index: 20;
+          background: rgba(247, 243, 255, 0.92);
+          backdrop-filter: blur(12px);
+          padding: 8px 0 12px;
+          margin-bottom: 10px;
+        }
+        .mobile-nav .step-btn {
+          margin-bottom: 0;
+          text-align: center;
+          padding: 12px 8px;
+          font-size: 12px;
+        }
+        .container {
+          margin: 12px auto 88px;
+          padding: 0 10px;
+        }
+        .hero {
+          padding: 18px;
+          border-radius: 22px;
+        }
+        .hero h1 {
+          font-size: 22px;
+        }
+        .panel {
+          padding: 14px;
+          border-radius: 20px;
+        }
+        .card {
+          padding: 14px;
+          border-radius: 18px;
+        }
+        .book-table-wrap {
+          display: none;
+        }
+        .book-cards {
+          display: block;
+        }
+        button,
+        input,
+        textarea,
+        select {
+          font-size: 16px;
+          min-height: 48px;
+        }
+        img#preview {
+          width: 100%;
+          max-width: 100%;
+        }
+        .actions button {
+          width: 100%;
+          min-height: 48px;
+        }
+      }
+      @media (max-width: 700px) {
+        .row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="hero">
+        <h1>سامانه ثبت کتاب با تصویر جلد</h1>
+        <p class="muted">
+          فرآیند کار: ۱) اسکن جلد ۲) تکمیل فرم ۳) مدیریت و خروجی گرفتن
+        </p>
+        <div class="hero-badges">
+          <span class="hero-badge">خواندن نوشته های روی جلد</span>
+          <span class="hero-badge">ذخیره لوکال روی دستگاه</span>
+          <span class="hero-badge">خروجی کتابخانه‌ای</span>
+          <span class="hero-badge">API اختیاری برای انتقال</span>
+        </div>
+      </div>
+
+      <div class="mobile-nav">
+        <button class="step-btn active" data-target="scanSection">اسکن</button>
+        <button class="step-btn" data-target="formSection">فرم</button>
+        <button class="step-btn" data-target="manageSection">مدیریت</button>
+      </div>
+
+      <div class="layout">
+        <aside class="sidebar">
+          <button class="step-btn active" data-target="scanSection">۱) اسکن جلد</button>
+          <button class="step-btn" data-target="formSection">۲) فرم اطلاعات</button>
+          <button class="step-btn" data-target="manageSection">۳) مدیریت و خروجی</button>
+        </aside>
+
+        <main class="panel">
+          <section id="scanSection" class="section active">
+            <h2>اسکن جلد کتاب</h2>
+            <div class="card">
+              <p class="muted">
+                عکس جلد را با کیفیت مناسب بگیرید تا نوشته های روی جلد مثل عنوان، پدیدآورندگان و ناشر دقیق‌تر خوانده شود.
+              </p>
+              <label for="imageInput">انتخاب عکس جلد</label>
+              <input id="imageInput" type="file" accept="image/*" capture="environment" />
+              <div class="preview-box">
+                <img id="preview" alt="preview" />
+              </div>
+              <div class="actions" style="margin-top: 10px">
+                <button id="scanBtn">اسکن و استخراج اطلاعات</button>
+              </div>
+              <p id="scanStatus" class="muted" style="margin-top: 8px"></p>
+            </div>
+            <details style="margin-top: 10px">
+              <summary>نمایش متن خام مدل</summary>
+              <pre id="rawText"></pre>
+            </details>
+          </section>
+
+          <section id="formSection" class="section">
+            <h2>فرم اطلاعات کتاب</h2>
+            <div class="card">
+              <div id="formModeChip" class="status-chip">حالت ثبت رکورد جدید</div>
+              <form id="bookForm">
+                <input id="editing_id" type="hidden" />
+                <div class="row">
+                  <div>
+                    <label>عنوان کتاب</label>
+                    <input id="title" required />
+                  </div>
+                  <div>
+                    <label>زیرعنوان</label>
+                    <input id="subtitle" />
+                  </div>
+                  <div>
+                    <label>پدیدآورندگان</label>
+                    <input id="creators" />
+                  </div>
+                  <div>
+                    <label>نویسنده(گان)</label>
+                    <input id="authors" />
+                  </div>
+                  <div>
+                    <label>مترجم</label>
+                    <input id="translators" />
+                  </div>
+                  <div>
+                    <label>ویراستار</label>
+                    <input id="editors" />
+                  </div>
+                  <div>
+                    <label>تصویرگر</label>
+                    <input id="illustrators" />
+                  </div>
+                  <div>
+                    <label>گردآورنده</label>
+                    <input id="compilers" />
+                  </div>
+                  <div>
+                    <label>ISBN</label>
+                    <input id="isbn" />
+                  </div>
+                  <div>
+                    <label>ناشر</label>
+                    <input id="publisher" />
+                  </div>
+                  <div>
+                    <label>محل نشر</label>
+                    <input id="publication_place" />
+                  </div>
+                  <div>
+                    <label>سال انتشار</label>
+                    <input id="publish_year" />
+                  </div>
+                  <div>
+                    <label>سال چاپ</label>
+                    <input id="print_year" />
+                  </div>
+                  <div>
+                    <label>نوبت چاپ / ویرایش</label>
+                    <input id="edition" />
+                  </div>
+                  <div>
+                    <label>جلد / شماره جلد</label>
+                    <input id="volume" />
+                  </div>
+                  <div>
+                    <label>عنوان مجموعه</label>
+                    <input id="series_title" />
+                  </div>
+                  <div>
+                    <label>زبان</label>
+                    <input id="language" />
+                  </div>
+                  <div>
+                    <label>دسته‌بندی</label>
+                    <input id="category" />
+                  </div>
+                  <div>
+                    <label>موضوع</label>
+                    <input id="subjects" />
+                  </div>
+                  <div>
+                    <label>برچسب‌ها</label>
+                    <input id="tags" />
+                  </div>
+                  <div>
+                    <label>رده / شماره بازیابی</label>
+                    <input id="call_number" />
+                  </div>
+                </div>
+                <div style="margin-top: 10px">
+                  <label>خلاصه نوشته‌های روی جلد</label>
+                  <textarea id="cover_text" rows="3"></textarea>
+                </div>
+                <div style="margin-top: 10px">
+                  <label>یادداشت</label>
+                  <textarea id="notes" rows="4"></textarea>
+                </div>
+                <input id="cover_url" type="hidden" />
+                <div class="sticky-actions">
+                  <div class="actions">
+                    <button id="submitBtn" type="submit">ذخیره کتاب</button>
+                    <button id="cancelEditBtn" type="button" class="light" style="display: none">
+                      لغو ویرایش
+                    </button>
+                  </div>
+                </div>
+              </form>
+              <p id="saveStatus" class="muted" style="margin-top: 8px"></p>
+              <div id="saveError" class="error-box" style="display: none"></div>
+            </div>
+          </section>
+
+          <section id="manageSection" class="section">
+            <h2>مدیریت اطلاعات و خروجی</h2>
+            <div class="card">
+              <div class="row" style="margin-bottom: 10px">
+                <div>
+                  <label>فرمت خروجی کتابخانه</label>
+                  <select id="exportProfile">
+                    <option value="simorgh">سیمرغ / عمومی فارسی</option>
+                    <option value="koha">Koha</option>
+                    <option value="marc-lite">MARC-Lite</option>
+                    <option value="standard">استاندارد داخلی</option>
+                  </select>
+                </div>
+              </div>
+              <div class="actions" style="margin-bottom: 10px">
+                <button id="refreshBtn" type="button" class="secondary">بارگذاری لیست</button>
+                <button id="exportBtn" type="button" class="secondary">دانلود خروجی</button>
+              </div>
+              <div class="book-table-wrap" style="overflow: auto">
+                <table class="book-table">
+                  <thead>
+                    <tr>
+                      <th>جلد</th>
+                      <th>عنوان</th>
+                      <th>پدیدآورنده</th>
+                      <th>ناشر</th>
+                      <th>سال</th>
+                      <th>ISBN</th>
+                      <th>عملیات</th>
+                    </tr>
+                  </thead>
+                  <tbody id="booksTbody"></tbody>
+                </table>
+              </div>
+              <div id="booksCards" class="book-cards"></div>
+              <pre id="booksList" style="display: none"></pre>
+            </div>
+            <div class="card" style="margin-top: 14px">
+              <h3 style="margin-top: 0">ارسال اختیاری به API</h3>
+              <p class="muted" style="margin-bottom: 10px">
+                رکوردها به صورت پیش‌فرض فقط روی همین مرورگر ذخیره می‌شوند. اگر خواستید، می‌توانید آدرس API سیستم خودتان را وارد کنید و داده‌ها را دستی ارسال کنید.
+              </p>
+              <div class="row">
+                <div>
+                  <label>آدرس API</label>
+                  <input id="apiUrl" placeholder="https://example.com/books/import" />
+                </div>
+                <div>
+                  <label>توکن API (اختیاری)</label>
+                  <input id="apiToken" placeholder="Bearer token یا کلید API" />
+                </div>
+              </div>
+              <div class="actions" style="margin-top: 10px">
+                <button id="saveApiSettingsBtn" type="button" class="light">ذخیره تنظیمات API</button>
+                <button id="sendAllBtn" type="button" class="secondary">ارسال همه رکوردها به API</button>
+              </div>
+              <p id="apiStatus" class="muted" style="margin-top: 8px"></p>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      const DB_NAME = "book-cover-local-db";
+      const DB_VERSION = 1;
+      const STORE_NAME = "books";
+      const imageInput = document.getElementById("imageInput");
+      const preview = document.getElementById("preview");
+      const scanBtn = document.getElementById("scanBtn");
+      const scanStatus = document.getElementById("scanStatus");
+      const rawText = document.getElementById("rawText");
+      const saveStatus = document.getElementById("saveStatus");
+      const booksList = document.getElementById("booksList");
+      const booksTbody = document.getElementById("booksTbody");
+      const booksCards = document.getElementById("booksCards");
+      const saveError = document.getElementById("saveError");
+      const exportProfileSelect = document.getElementById("exportProfile");
+      const submitBtn = document.getElementById("submitBtn");
+      const cancelEditBtn = document.getElementById("cancelEditBtn");
+      const formModeChip = document.getElementById("formModeChip");
+      const apiUrlInput = document.getElementById("apiUrl");
+      const apiTokenInput = document.getElementById("apiToken");
+      const apiStatus = document.getElementById("apiStatus");
+      const stepButtons = document.querySelectorAll(".step-btn");
+      const sections = document.querySelectorAll(".section");
+      let dbPromise = null;
+
+      const fields = [
+        "title",
+        "subtitle",
+        "creators",
+        "authors",
+        "translators",
+        "editors",
+        "illustrators",
+        "compilers",
+        "isbn",
+        "publisher",
+        "publication_place",
+        "publish_year",
+        "print_year",
+        "edition",
+        "volume",
+        "series_title",
+        "language",
+        "category",
+        "subjects",
+        "tags",
+        "call_number",
+        "cover_text",
+        "notes",
+        "cover_url"
+      ].reduce((acc, id) => {
+        acc[id] = document.getElementById(id);
+        return acc;
+      }, {});
+      const editingIdInput = document.getElementById("editing_id");
+
+      const EXPORT_PROFILES = {
+        simorgh: {
+          label: "سیمرغ",
+          ext: "csv",
+          headers: [
+            "عنوان",
+            "زیرعنوان",
+            "پدیدآورنده",
+            "نویسنده",
+            "مترجم",
+            "ویراستار",
+            "گردآورنده",
+            "ناشر",
+            "محل نشر",
+            "سال انتشار",
+            "سال چاپ",
+            "نوبت چاپ",
+            "جلد",
+            "عنوان مجموعه",
+            "شماره ISBN",
+            "زبان",
+            "دسته‌بندی",
+            "موضوع",
+            "برچسب",
+            "رده",
+            "یادداشت"
+          ],
+          map: (b) => [
+            b.title,
+            b.subtitle,
+            b.creators,
+            b.authors,
+            b.translators,
+            b.editors,
+            b.compilers,
+            b.publisher,
+            b.publication_place,
+            b.publish_year,
+            b.print_year,
+            b.edition,
+            b.volume,
+            b.series_title,
+            b.isbn,
+            b.language,
+            b.category,
+            b.subjects,
+            b.tags,
+            b.call_number,
+            b.notes
+          ]
+        },
+        koha: {
+          label: "Koha",
+          ext: "csv",
+          headers: [
+            "title",
+            "subtitle",
+            "author",
+            "isbn",
+            "publisher",
+            "publication_year",
+            "publication_place",
+            "edition",
+            "language",
+            "subjects",
+            "notes"
+          ],
+          map: (b) => [
+            b.title,
+            b.subtitle,
+            [b.authors, b.creators].filter(Boolean).join("; "),
+            b.isbn,
+            b.publisher,
+            b.publish_year,
+            b.publication_place,
+            b.edition,
+            b.language,
+            b.subjects,
+            b.notes
+          ]
+        },
+        "marc-lite": {
+          label: "MARC-Lite",
+          ext: "csv",
+          headers: [
+            "245$a_عنوان",
+            "245$b_زیرعنوان",
+            "100$a_نویسنده_اصلی",
+            "700$a_مترجم_ویراستار",
+            "260$b_ناشر",
+            "260$a_محل_نشر",
+            "260$c_سال_انتشار",
+            "020$a_ISBN",
+            "250$a_ویرایش",
+            "041$a_زبان",
+            "650$a_موضوع",
+            "082$a_رده",
+            "500$a_یادداشت"
+          ],
+          map: (b) => [
+            b.title,
+            b.subtitle,
+            [b.authors, b.creators].filter(Boolean).join("; "),
+            [b.translators, b.editors, b.compilers].filter(Boolean).join("; "),
+            b.publisher,
+            b.publication_place,
+            b.publish_year,
+            b.isbn,
+            b.edition,
+            b.language,
+            b.subjects,
+            b.call_number,
+            b.notes
+          ]
+        },
+        standard: {
+          label: "استاندارد",
+          ext: "csv",
+          headers: [
+            "id",
+            "title",
+            "subtitle",
+            "creators",
+            "authors",
+            "translators",
+            "editors",
+            "illustrators",
+            "compilers",
+            "isbn",
+            "publisher",
+            "publication_place",
+            "publish_year",
+            "print_year",
+            "edition",
+            "volume",
+            "series_title",
+            "language",
+            "category",
+            "subjects",
+            "tags",
+            "call_number",
+            "cover_text",
+            "notes",
+            "cover_url",
+            "created_at"
+          ],
+          map: (b) => [
+            b.id,
+            b.title,
+            b.subtitle,
+            b.creators,
+            b.authors,
+            b.translators,
+            b.editors,
+            b.illustrators,
+            b.compilers,
+            b.isbn,
+            b.publisher,
+            b.publication_place,
+            b.publish_year,
+            b.print_year,
+            b.edition,
+            b.volume,
+            b.series_title,
+            b.language,
+            b.category,
+            b.subjects,
+            b.tags,
+            b.call_number,
+            b.cover_text,
+            b.notes,
+            b.cover_url,
+            b.created_at
+          ]
+        }
+      };
+
+      function normalizeIsbn(value) {
+        return `${value ?? ""}`.replace(/[\s\-]/g, "").toUpperCase();
+      }
+
+      function normalizeTextKey(value) {
+        return `${value ?? ""}`
+          .trim()
+          .replace(/\s+/g, " ")
+          .toLowerCase()
+          .replace(/ي/g, "ی")
+          .replace(/ك/g, "ک")
+          .replace(/[ًٌٍَُِّْ]/g, "");
+      }
+
+      function showSaveError(message) {
+        if (!message) {
+          saveError.style.display = "none";
+          saveError.textContent = "";
+          return;
+        }
+        saveError.textContent = message;
+        saveError.style.display = "block";
+      }
+
+      async function findDuplicate(payload, excludeId) {
+        const items = await listLocalBooks();
+        const isbn = normalizeIsbn(payload.isbn);
+        const titleKey = normalizeTextKey(payload.title);
+        const authorKey = normalizeTextKey(payload.authors || payload.creators);
+
+        for (const item of items) {
+          if (excludeId && Number(item.id) === Number(excludeId)) continue;
+
+          if (isbn && normalizeIsbn(item.isbn) === isbn) {
+            return {
+              type: "isbn",
+              message: `کتابی با همین ISBN قبلا ثبت شده است (شناسه ${item.id}: ${item.title || "بدون عنوان"}).`,
+              item
+            };
+          }
+
+          const itemTitle = normalizeTextKey(item.title);
+          const itemAuthor = normalizeTextKey(item.authors || item.creators);
+          if (titleKey && itemTitle && titleKey === itemTitle) {
+            if (!authorKey || !itemAuthor || authorKey === itemAuthor) {
+              return {
+                type: "title",
+                message: `کتابی با همین عنوان${authorKey ? " و نویسنده" : ""} قبلا ثبت شده است (شناسه ${item.id}).`,
+                item
+              };
+            }
+          }
+        }
+        return null;
+      }
+
+      function getDb() {
+        if (!dbPromise) {
+          dbPromise = new Promise((resolve, reject) => {
+            const req = indexedDB.open(DB_NAME, DB_VERSION);
+            req.onupgradeneeded = () => {
+              const db = req.result;
+              if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME, { keyPath: "id" });
+              }
+            };
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+          });
+        }
+        return dbPromise;
+      }
+
+      async function listLocalBooks() {
+        const db = await getDb();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(STORE_NAME, "readonly");
+          const store = tx.objectStore(STORE_NAME);
+          const req = store.getAll();
+          req.onsuccess = () => {
+            const items = (req.result || []).sort((a, b) => Number(b.id) - Number(a.id));
+            resolve(items);
+          };
+          req.onerror = () => reject(req.error);
+        });
+      }
+
+      async function saveLocalBook(record) {
+        const db = await getDb();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(STORE_NAME, "readwrite");
+          const store = tx.objectStore(STORE_NAME);
+          const req = store.put(record);
+          req.onsuccess = () => resolve(record.id);
+          req.onerror = () => reject(req.error);
+        });
+      }
+
+      async function deleteLocalBook(id) {
+        const db = await getDb();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(STORE_NAME, "readwrite");
+          const store = tx.objectStore(STORE_NAME);
+          const req = store.delete(id);
+          req.onsuccess = () => resolve();
+          req.onerror = () => reject(req.error);
+        });
+      }
+
+      function nextLocalId() {
+        return Date.now();
+      }
+
+      function loadApiSettings() {
+        apiUrlInput.value = localStorage.getItem("book_app_api_url") || "";
+        apiTokenInput.value = localStorage.getItem("book_app_api_token") || "";
+      }
+
+      function saveApiSettings() {
+        localStorage.setItem("book_app_api_url", apiUrlInput.value.trim());
+        localStorage.setItem("book_app_api_token", apiTokenInput.value.trim());
+        apiStatus.textContent = "تنظیمات API روی همین مرورگر ذخیره شد.";
+      }
+
+      function activateSection(id) {
+        sections.forEach((section) => section.classList.toggle("active", section.id === id));
+        stepButtons.forEach((btn) => btn.classList.toggle("active", btn.dataset.target === id));
+      }
+
+      stepButtons.forEach((btn) => {
+        btn.addEventListener("click", () => activateSection(btn.dataset.target));
+      });
+
+      imageInput.addEventListener("change", () => {
+        const file = imageInput.files?.[0];
+        if (!file) return;
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = "block";
+      });
+
+      function shortModelName(id) {
+        if (!id) return "—";
+        if (id.includes("gemma-4")) return "Gemma 4";
+        if (id.includes("moondream")) return "Moondream 3.1";
+        if (id.includes("mistral-small")) return "Mistral Small 3.1";
+        if (id.includes("llama-4-scout")) return "Llama 4 Scout";
+        if (id.includes("llama-3.2")) return "Llama 3.2 Vision";
+        return id.split("/").pop() || id;
+      }
+
+      function formatDuration(ms) {
+        if (!ms && ms !== 0) return "";
+        const seconds = (ms / 1000).toFixed(1);
+        return `${seconds} ثانیه`;
+      }
+
+      function buildModelHint(models) {
+        if (!models) return "";
+        const parts = [
+          `${shortModelName(models.stage1)} خواند`,
+          `${shortModelName(models.stage2)} ساختاردهی`
+        ];
+        if (models.total_ms) {
+          parts.push(`کل: ${formatDuration(models.total_ms)}`);
+        }
+        if (models.stage1_ms || models.stage2_ms) {
+          parts.push(
+            `(${formatDuration(models.stage1_ms)} + ${formatDuration(models.stage2_ms)})`
+          );
+        }
+        return ` مدل‌ها: ${parts.join(" | ")}`;
+      }
+
+      scanBtn.addEventListener("click", async () => {
+        const file = imageInput.files?.[0];
+        if (!file) {
+          scanStatus.textContent = "اول یک عکس انتخاب کنید.";
+          return;
+        }
+        scanStatus.textContent = "در حال پردازش تصویر...";
+        const fd = new FormData();
+        fd.append("image", file);
+        try {
+          const res = await fetch("/api/scan", { method: "POST", body: fd });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "scan failed");
+          fields.title.value = data.parsed?.title || "";
+          fields.subtitle.value = data.parsed?.subtitle || "";
+          fields.creators.value = data.parsed?.creators || "";
+          fields.authors.value = data.parsed?.authors || "";
+          fields.translators.value = data.parsed?.translators || "";
+          fields.editors.value = data.parsed?.editors || "";
+          fields.illustrators.value = data.parsed?.illustrators || "";
+          fields.compilers.value = data.parsed?.compilers || "";
+          fields.isbn.value = data.parsed?.isbn || "";
+          fields.publisher.value = data.parsed?.publisher || "";
+          fields.publication_place.value = data.parsed?.publication_place || "";
+          fields.publish_year.value = data.parsed?.publish_year || "";
+          fields.print_year.value = data.parsed?.print_year || "";
+          fields.edition.value = data.parsed?.edition || "";
+          fields.volume.value = data.parsed?.volume || "";
+          fields.series_title.value = data.parsed?.series_title || "";
+          fields.language.value = data.parsed?.language || "";
+          fields.category.value = data.parsed?.category || "";
+          fields.subjects.value = data.parsed?.subjects || "";
+          fields.tags.value = data.parsed?.tags || "";
+          fields.call_number.value = data.parsed?.call_number || "";
+          fields.cover_text.value = data.parsed?.cover_text || "";
+          fields.notes.value = data.parsed?.notes || "";
+          fields.cover_url.value = data.coverUrl || "";
+          rawText.textContent = data.extractedText || "";
+          const modelHint = buildModelHint(data.models);
+          scanStatus.textContent = data.parsed?.title
+            ? `استخراج اطلاعات انجام شد. لطفا فرم را بازبینی کنید.${modelHint}`
+            : `مدل پاسخ داد اما فیلدی پر نشد. متن خام را بررسی کنید.${modelHint}`;
+          activateSection("formSection");
+        } catch (e) {
+          scanStatus.textContent = `خطا: ${e.message}`;
+        }
+      });
+
+      function resetFormMode() {
+        editingIdInput.value = "";
+        submitBtn.textContent = "ذخیره کتاب";
+        formModeChip.textContent = "حالت ثبت رکورد جدید";
+        cancelEditBtn.style.display = "none";
+        showSaveError("");
+      }
+
+      function setEditMode(book) {
+        editingIdInput.value = String(book.id);
+        submitBtn.textContent = "ثبت تغییرات";
+        formModeChip.textContent = `حالت ویرایش رکورد #${book.id}`;
+        cancelEditBtn.style.display = "inline-block";
+        fields.title.value = book.title || "";
+        fields.subtitle.value = book.subtitle || "";
+        fields.creators.value = book.creators || "";
+        fields.authors.value = book.authors || "";
+        fields.translators.value = book.translators || "";
+        fields.editors.value = book.editors || "";
+        fields.illustrators.value = book.illustrators || "";
+        fields.compilers.value = book.compilers || "";
+        fields.isbn.value = book.isbn || "";
+        fields.publisher.value = book.publisher || "";
+        fields.publication_place.value = book.publication_place || "";
+        fields.publish_year.value = book.publish_year || "";
+        fields.print_year.value = book.print_year || "";
+        fields.edition.value = book.edition || "";
+        fields.volume.value = book.volume || "";
+        fields.series_title.value = book.series_title || "";
+        fields.language.value = book.language || "";
+        fields.category.value = book.category || "";
+        fields.subjects.value = book.subjects || "";
+        fields.tags.value = book.tags || "";
+        fields.call_number.value = book.call_number || "";
+        fields.cover_text.value = book.cover_text || "";
+        fields.notes.value = book.notes || "";
+        fields.cover_url.value = book.cover_url || "";
+        activateSection("formSection");
+      }
+
+      cancelEditBtn.addEventListener("click", () => {
+        document.getElementById("bookForm").reset();
+        fields.cover_url.value = "";
+        resetFormMode();
+      });
+
+      document.getElementById("saveApiSettingsBtn").addEventListener("click", saveApiSettings);
+
+      document.getElementById("sendAllBtn").addEventListener("click", async () => {
+        const apiUrl = apiUrlInput.value.trim();
+        const apiToken = apiTokenInput.value.trim();
+        if (!apiUrl) {
+          apiStatus.textContent = "اول آدرس API را وارد کنید.";
+          return;
+        }
+        apiStatus.textContent = "در حال ارسال رکوردها به API...";
+        try {
+          const items = await listLocalBooks();
+          const headers = { "Content-Type": "application/json" };
+          if (apiToken) headers.Authorization = apiToken.startsWith("Bearer ")
+            ? apiToken
+            : `Bearer ${apiToken}`;
+          const res = await fetch(apiUrl, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({ items })
+          });
+          const text = await res.text();
+          if (!res.ok) throw new Error(text || "API request failed");
+          apiStatus.textContent = "ارسال به API با موفقیت انجام شد.";
+        } catch (e) {
+          apiStatus.textContent = `خطا در ارسال به API: ${e.message}`;
+        }
+      });
+
+      document.getElementById("bookForm").addEventListener("submit", async (ev) => {
+        ev.preventDefault();
+        const editingId = editingIdInput.value.trim();
+        showSaveError("");
+        saveStatus.textContent = editingId ? "در حال ثبت تغییرات در مرورگر..." : "در حال ذخیره روی دستگاه...";
+        const payload = {};
+        for (const [key, input] of Object.entries(fields)) payload[key] = input.value.trim();
+        try {
+          const duplicate = await findDuplicate(payload, editingId || null);
+          if (duplicate) {
+            saveStatus.textContent = "";
+            showSaveError(duplicate.message);
+            return;
+          }
+
+          const id = editingId ? Number(editingId) : nextLocalId();
+          let createdAt = new Date().toISOString();
+          if (editingId) {
+            const items = await listLocalBooks();
+            const prev = items.find((x) => Number(x.id) === Number(editingId));
+            createdAt = prev?.created_at || createdAt;
+          }
+
+          const record = {
+            ...payload,
+            id,
+            created_at: createdAt
+          };
+          await saveLocalBook(record);
+          saveStatus.textContent = editingId
+            ? `ویرایش روی دستگاه انجام شد. شناسه: ${id}`
+            : `رکورد روی همین دستگاه ذخیره شد. شناسه: ${id}`;
+          await loadBooks();
+          if (!editingId) document.getElementById("bookForm").reset();
+          fields.cover_url.value = "";
+          resetFormMode();
+          activateSection("manageSection");
+        } catch (e) {
+          saveStatus.textContent = "";
+          showSaveError(`خطا: ${e.message}`);
+        }
+      });
+
+      document.getElementById("refreshBtn").addEventListener("click", loadBooks);
+      document.getElementById("exportBtn").addEventListener("click", () => {
+        exportLocalCsv();
+      });
+
+      async function deleteBook(id) {
+        const ok = window.confirm("این رکورد حذف شود؟");
+        if (!ok) return;
+        try {
+          await deleteLocalBook(Number(id));
+          await loadBooks();
+        } catch (e) {
+          alert(`خطا در حذف: ${e.message}`);
+        }
+      }
+
+      function csvEscape(value) {
+        const s = `${value ?? ""}`;
+        if (s.includes('"') || s.includes(",") || s.includes("\n")) {
+          return `"${s.replace(/"/g, '""')}"`;
+        }
+        return s;
+      }
+
+      async function exportLocalCsv() {
+        const items = await listLocalBooks();
+        const profileKey = exportProfileSelect.value || "simorgh";
+        const profile = EXPORT_PROFILES[profileKey] || EXPORT_PROFILES.simorgh;
+        const rows = [profile.headers.join(",")];
+        for (const item of items) {
+          rows.push(profile.map(item).map((v) => csvEscape(v)).join(","));
+        }
+        const blob = new Blob([`\uFEFF${rows.join("\n")}`], {
+          type: "text/csv;charset=utf-8"
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `books-${profileKey}.${profile.ext}`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function bindBookActions(container, items) {
+        container.querySelectorAll(".edit-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const id = Number(btn.dataset.id);
+            const book = items.find((x) => Number(x.id) === id);
+            if (book) setEditMode(book);
+          });
+        });
+        container.querySelectorAll(".delete-btn").forEach((btn) => {
+          btn.addEventListener("click", () => deleteBook(btn.dataset.id));
+        });
+      }
+
+      function renderBooks(items) {
+        booksTbody.innerHTML = "";
+        booksCards.innerHTML = "";
+        if (!items.length) {
+          booksTbody.innerHTML =
+            '<tr><td colspan="7" class="muted">هنوز کتابی ثبت نشده است.</td></tr>';
+          booksCards.innerHTML = '<p class="muted">هنوز کتابی ثبت نشده است.</p>';
+          return;
+        }
+        for (const book of items) {
+          const tr = document.createElement("tr");
+          const coverCell = book.cover_url
+            ? `<img class="book-cover-thumb" src="${book.cover_url}" alt="cover" />`
+            : "—";
+          tr.innerHTML = `
+            <td>${coverCell}</td>
+            <td>${book.title || ""}</td>
+            <td>${book.creators || book.authors || ""}</td>
+            <td>${book.publisher || ""}</td>
+            <td>${book.publish_year || ""}</td>
+            <td>${book.isbn || ""}</td>
+            <td>
+              <div class="row-actions">
+                <button class="light edit-btn" data-id="${book.id}">ویرایش</button>
+                <button class="danger delete-btn" data-id="${book.id}">حذف</button>
+              </div>
+            </td>
+          `;
+          booksTbody.appendChild(tr);
+
+          const card = document.createElement("div");
+          card.className = "book-card";
+          const coverHtml = book.cover_url
+            ? `<img class="book-cover-thumb" src="${book.cover_url}" alt="cover" style="margin-bottom:8px" />`
+            : "";
+          card.innerHTML = `
+            ${coverHtml}
+            <h4>${book.title || "بدون عنوان"}</h4>
+            <div class="meta">
+              ${book.authors || book.creators ? `نویسنده: ${book.authors || book.creators}<br />` : ""}
+              ${book.publisher ? `ناشر: ${book.publisher}<br />` : ""}
+              ${book.publish_year ? `سال: ${book.publish_year}<br />` : ""}
+              ${book.isbn ? `ISBN: ${book.isbn}` : ""}
+            </div>
+            <div class="row-actions" style="margin-top:10px">
+              <button class="light edit-btn" data-id="${book.id}">ویرایش</button>
+              <button class="danger delete-btn" data-id="${book.id}">حذف</button>
+            </div>
+          `;
+          booksCards.appendChild(card);
+        }
+        bindBookActions(booksTbody, items);
+        bindBookActions(booksCards, items);
+      }
+
+      async function loadBooks() {
+        booksList.textContent = "در حال بارگذاری...";
+        try {
+          const items = await listLocalBooks();
+          renderBooks(items);
+          booksList.textContent = JSON.stringify(items, null, 2);
+        } catch (e) {
+          booksList.textContent = `خطا: ${e.message}`;
+        }
+      }
+
+      loadApiSettings();
+      const savedProfile = localStorage.getItem("book_app_export_profile");
+      if (savedProfile && EXPORT_PROFILES[savedProfile]) {
+        exportProfileSelect.value = savedProfile;
+      }
+      exportProfileSelect.addEventListener("change", () => {
+        localStorage.setItem("book_app_export_profile", exportProfileSelect.value);
+      });
+      loadBooks();
+      resetFormMode();
+    </script>
+  </body>
+</html>
