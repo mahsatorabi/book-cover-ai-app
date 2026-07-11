@@ -684,6 +684,16 @@ function stripFieldNoise(value) {
 const LAYOUT_PREFIX_RX =
   /^(top line|large title|small title|bottom line|middle section|top section|bottom section|header|footer|line\s*\d+)\s*[:：]\s*/i;
 
+function normalizeEditionText(text) {
+  let cleaned = cleanField(text)
+    .replace(/^(?:نوبت\s*چاپ|ویرایش|edition)\s*[:：]\s*/i, "")
+    .replace(/\(print edition[^)]*\)/gi, "")
+    .replace(/\s*\((?:Edition|Print edition)\s*:.*$/i, "")
+    .replace(/\s*->.*$/i, "")
+    .trim();
+  return cleaned;
+}
+
 function splitBilingualText(text) {
   let cleaned = cleanField(text).replace(LAYOUT_PREFIX_RX, "").trim();
   cleaned = cleaned.replace(/\s*->\s*actually.*$/i, "").replace(/\s*->.*$/i, "").trim();
@@ -738,6 +748,11 @@ function normalizeExtractedText(value, fieldKey) {
         .join("\n"),
       parallel: ""
     };
+  }
+
+  if (fieldKey === "edition") {
+    text = normalizeEditionText(text);
+    return { text, parallel: "" };
   }
 
   const { fa, en } = splitBilingualText(text);

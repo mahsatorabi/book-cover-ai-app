@@ -87,7 +87,15 @@ const checks = [
   ["strip layout prefix from subtitle", kimiaParsed.subtitle, "قند سفید"],
   ["strip author annotation", kimiaParsed.main_entry.includes("Author"), false],
   ["strip editor english", kimiaParsed.editors, "دکتر مژگان خسروی پور"],
-  ["parallel title from english", kimiaParsed.parallel_title.includes("Short Stories") || kimiaParsed.parallel_title.includes("White Sugar"), true]
+  ["parallel title from english", kimiaParsed.parallel_title.includes("Short Stories") || kimiaParsed.parallel_title.includes("White Sugar"), true],
+  [
+    "clean edition from english annotation",
+    mod.parseBookJson(
+      JSON.stringify({ edition: "نوبت چاپ: اول ایاپیز (۱۴۰۲) (Edition: First Ayapiz (1402))" }),
+      []
+    ).edition,
+    "اول ایاپیز (۱۴۰۲)"
+  ]
 ];
 
 let failed = 0;

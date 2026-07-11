@@ -1028,6 +1028,8 @@
           return "";
         }
         text = text
+          .replace(/^(?:نوبت\s*چاپ|ویرایش|edition)\s*[:：]\s*/i, "")
+          .replace(/\s*\((?:Edition|Print edition)\s*:.*$/i, "")
           .replace(/^(top line|large title|small title)\s*[:：]\s*/i, "")
           .replace(/\s*\((?:Author|Editor|Translator)[^)]*$/i, "")
           .replace(/\s*->.*$/i, "")
