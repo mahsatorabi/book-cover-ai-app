@@ -421,6 +421,16 @@
           min-height: 48px;
         }
       }
+      .field-section {
+        margin-top: 16px;
+        padding-top: 12px;
+        border-top: 1px dashed var(--border);
+      }
+      .field-section h3 {
+        margin: 0 0 10px;
+        font-size: 14px;
+        color: var(--muted);
+      }
       @media (max-width: 700px) {
         .row {
           grid-template-columns: 1fr;
@@ -431,15 +441,15 @@
   <body>
     <div class="container">
       <div class="hero">
-        <h1>سامانه ثبت کتاب با تصویر جلد</h1>
+        <h1>سامانه ثبت کتاب با صفحات حقوقی</h1>
         <p class="muted">
-          فرآیند کار: ۱) اسکن جلد ۲) تکمیل فرم ۳) مدیریت و خروجی گرفتن
+          فرآیند کار: ۱) اسکن صفحات حقوقی ۲) تکمیل فرم ای.ای.سی.آر.2 ۳) مدیریت و خروجی
         </p>
         <div class="hero-badges">
-          <span class="hero-badge">خواندن نوشته های روی جلد</span>
+          <span class="hero-badge">خواندن صفحات حقوقی کتاب</span>
+          <span class="hero-badge">استاندارد ای.ای.سی.آر.2</span>
           <span class="hero-badge">ذخیره لوکال روی دستگاه</span>
           <span class="hero-badge">خروجی کتابخانه‌ای</span>
-          <span class="hero-badge">API اختیاری برای انتقال</span>
         </div>
       </div>
 
@@ -451,19 +461,19 @@
 
       <div class="layout">
         <aside class="sidebar">
-          <button class="step-btn active" data-target="scanSection">۱) اسکن جلد</button>
+          <button class="step-btn active" data-target="scanSection">۱) اسکن صفحات حقوقی</button>
           <button class="step-btn" data-target="formSection">۲) فرم اطلاعات</button>
           <button class="step-btn" data-target="manageSection">۳) مدیریت و خروجی</button>
         </aside>
 
         <main class="panel">
           <section id="scanSection" class="section active">
-            <h2>اسکن جلد کتاب</h2>
+            <h2>اسکن صفحات حقوقی کتاب</h2>
             <div class="card">
               <p class="muted">
-                عکس جلد را با کیفیت مناسب بگیرید تا نوشته های روی جلد مثل عنوان، پدیدآورندگان و ناشر دقیق‌تر خوانده شود.
+                عکس صفحات حقوقی (شناسنامه) کتاب را بگیرید. طبق ای.ای.سی.آر.2 این صفحه منبع اصلی اطلاعات است: سرشناسه، عنوان، پدیدآور، ناشر و شابک.
               </p>
-              <label for="imageInput">انتخاب عکس جلد</label>
+              <label for="imageInput">انتخاب عکس صفحات حقوقی</label>
               <input id="imageInput" type="file" accept="image/*" capture="environment" />
               <div class="preview-box">
                 <img id="preview" alt="preview" />
@@ -480,106 +490,166 @@
           </section>
 
           <section id="formSection" class="section">
-            <h2>فرم اطلاعات کتاب</h2>
+            <h2>فرم اطلاعات کتاب (ای.ای.سی.آر.2)</h2>
             <div class="card">
               <div id="formModeChip" class="status-chip">حالت ثبت رکورد جدید</div>
               <form id="bookForm">
                 <input id="editing_id" type="hidden" />
-                <div class="row">
-                  <div>
-                    <label>عنوان کتاب</label>
-                    <input id="title" required />
+                <div class="field-section">
+                  <h3>ناحیه سرشناسه (1XX)</h3>
+                  <div class="row">
+                    <div>
+                      <label>سرشناسه / ورود اصلی</label>
+                      <input id="main_entry" placeholder="نام خانوادگی، نام" />
+                    </div>
+                    <div>
+                      <label>سرشناسه‌های افزوده</label>
+                      <input id="added_entries" placeholder="مترجم، ویراستار، گردآورنده..." />
+                    </div>
                   </div>
-                  <div>
-                    <label>زیرعنوان</label>
-                    <input id="subtitle" />
+                </div>
+                <div class="field-section">
+                  <h3>ناحیه عنوان و شرح پدیدآور (245)</h3>
+                  <div class="row">
+                    <div>
+                      <label>عنوان اصلی</label>
+                      <input id="title" required />
+                    </div>
+                    <div>
+                      <label>عنوان فرعی</label>
+                      <input id="subtitle" />
+                    </div>
+                    <div>
+                      <label>عنوان برابر</label>
+                      <input id="parallel_title" />
+                    </div>
+                    <div>
+                      <label>شرح پدیدآور</label>
+                      <input id="creators" />
+                    </div>
+                    <div>
+                      <label>نویسنده(گان)</label>
+                      <input id="authors" />
+                    </div>
+                    <div>
+                      <label>مترجم</label>
+                      <input id="translators" />
+                    </div>
+                    <div>
+                      <label>ویراستار</label>
+                      <input id="editors" />
+                    </div>
+                    <div>
+                      <label>تصویرگر</label>
+                      <input id="illustrators" />
+                    </div>
+                    <div>
+                      <label>گردآورنده</label>
+                      <input id="compilers" />
+                    </div>
                   </div>
-                  <div>
-                    <label>پدیدآورندگان</label>
-                    <input id="creators" />
+                </div>
+                <div class="field-section">
+                  <h3>ناحیه ویرایش (250)</h3>
+                  <div class="row">
+                    <div>
+                      <label>ویرایش / نوبت چاپ</label>
+                      <input id="edition" />
+                    </div>
                   </div>
-                  <div>
-                    <label>نویسنده(گان)</label>
-                    <input id="authors" />
+                </div>
+                <div class="field-section">
+                  <h3>ناحیه نشرداده (260)</h3>
+                  <div class="row">
+                    <div>
+                      <label>محل نشر</label>
+                      <input id="publication_place" />
+                    </div>
+                    <div>
+                      <label>ناشر</label>
+                      <input id="publisher" />
+                    </div>
+                    <div>
+                      <label>سال نشر</label>
+                      <input id="publish_year" />
+                    </div>
+                    <div>
+                      <label>سال حقوق نشر</label>
+                      <input id="copyright_date" />
+                    </div>
+                    <div>
+                      <label>سال چاپ</label>
+                      <input id="print_year" />
+                    </div>
                   </div>
-                  <div>
-                    <label>مترجم</label>
-                    <input id="translators" />
+                </div>
+                <div class="field-section">
+                  <h3>ناحیه مشخصات ظاهری (300)</h3>
+                  <div class="row">
+                    <div>
+                      <label>تعداد صفحات / مشخصات ظاهری</label>
+                      <input id="extent" placeholder="مثلاً 320 ص." />
+                    </div>
+                    <div>
+                      <label>ابعاد</label>
+                      <input id="dimensions" placeholder="مثلاً 22×14 سانتی‌متر" />
+                    </div>
+                    <div>
+                      <label>مواد همراه</label>
+                      <input id="accompanying_material" placeholder="CD، نقشه..." />
+                    </div>
+                    <div>
+                      <label>شماره جلد</label>
+                      <input id="volume_number" />
+                    </div>
                   </div>
-                  <div>
-                    <label>ویراستار</label>
-                    <input id="editors" />
+                </div>
+                <div class="field-section">
+                  <h3>ناحیه فروست (440/490)</h3>
+                  <div class="row">
+                    <div>
+                      <label>عنوان فروست</label>
+                      <input id="series_title" />
+                    </div>
+                    <div>
+                      <label>شماره در فروست</label>
+                      <input id="series_number" />
+                    </div>
                   </div>
-                  <div>
-                    <label>تصویرگر</label>
-                    <input id="illustrators" />
-                  </div>
-                  <div>
-                    <label>گردآورنده</label>
-                    <input id="compilers" />
-                  </div>
-                  <div>
-                    <label>ISBN</label>
-                    <input id="isbn" />
-                  </div>
-                  <div>
-                    <label>ناشر</label>
-                    <input id="publisher" />
-                  </div>
-                  <div>
-                    <label>محل نشر</label>
-                    <input id="publication_place" />
-                  </div>
-                  <div>
-                    <label>سال انتشار</label>
-                    <input id="publish_year" />
-                  </div>
-                  <div>
-                    <label>سال چاپ</label>
-                    <input id="print_year" />
-                  </div>
-                  <div>
-                    <label>نوبت چاپ / ویرایش</label>
-                    <input id="edition" />
-                  </div>
-                  <div>
-                    <label>جلد / شماره جلد</label>
-                    <input id="volume" />
-                  </div>
-                  <div>
-                    <label>عنوان مجموعه</label>
-                    <input id="series_title" />
-                  </div>
-                  <div>
-                    <label>زبان</label>
-                    <input id="language" />
-                  </div>
-                  <div>
-                    <label>دسته‌بندی</label>
-                    <input id="category" />
-                  </div>
-                  <div>
-                    <label>موضوع</label>
-                    <input id="subjects" />
-                  </div>
-                  <div>
-                    <label>برچسب‌ها</label>
-                    <input id="tags" />
-                  </div>
-                  <div>
-                    <label>رده / شماره بازیابی</label>
-                    <input id="call_number" />
+                </div>
+                <div class="field-section">
+                  <h3>شناسه‌ها، زبان و موضوع</h3>
+                  <div class="row">
+                    <div>
+                      <label>ISBN / شابک (020)</label>
+                      <input id="isbn" />
+                    </div>
+                    <div>
+                      <label>زبان (041)</label>
+                      <input id="language" />
+                    </div>
+                    <div>
+                      <label>موضوع (650)</label>
+                      <input id="subjects" />
+                    </div>
+                    <div>
+                      <label>رده / شماره بازیابی (082)</label>
+                      <input id="call_number" />
+                    </div>
                   </div>
                 </div>
                 <div style="margin-top: 10px">
-                  <label>خلاصه نوشته‌های روی جلد</label>
+                  <label>متن صفحات حقوقی</label>
                   <textarea id="cover_text" rows="3"></textarea>
                 </div>
                 <div style="margin-top: 10px">
-                  <label>یادداشت</label>
+                  <label>یادداشت (500)</label>
                   <textarea id="notes" rows="4"></textarea>
                 </div>
                 <input id="cover_url" type="hidden" />
+                <input id="volume" type="hidden" />
+                <input id="category" type="hidden" />
+                <input id="tags" type="hidden" />
                 <div class="sticky-actions">
                   <div class="actions">
                     <button id="submitBtn" type="submit">ذخیره کتاب</button>
@@ -601,6 +671,7 @@
                 <div>
                   <label>فرمت خروجی کتابخانه</label>
                   <select id="exportProfile">
+                    <option value="aacr2">ای.ای.سی.آر.2 / فارسی</option>
                     <option value="simorgh">سیمرغ / عمومی فارسی</option>
                     <option value="koha">Koha</option>
                     <option value="marc-lite">MARC-Lite</option>
@@ -616,9 +687,9 @@
                 <table class="book-table">
                   <thead>
                     <tr>
-                      <th>جلد</th>
+                      <th>تصویر</th>
                       <th>عنوان</th>
-                      <th>پدیدآورنده</th>
+                      <th>سرشناسه</th>
                       <th>ناشر</th>
                       <th>سال</th>
                       <th>ISBN</th>
@@ -682,65 +753,143 @@
       const sections = document.querySelectorAll(".section");
       let dbPromise = null;
 
-      const fields = [
+      const BOOK_FIELD_IDS = [
+        "main_entry",
         "title",
         "subtitle",
+        "parallel_title",
         "creators",
         "authors",
         "translators",
         "editors",
         "illustrators",
         "compilers",
-        "isbn",
-        "publisher",
-        "publication_place",
-        "publish_year",
-        "print_year",
         "edition",
-        "volume",
+        "publication_place",
+        "publisher",
+        "publish_year",
+        "copyright_date",
+        "print_year",
+        "extent",
+        "dimensions",
+        "accompanying_material",
+        "volume_number",
         "series_title",
+        "series_number",
+        "added_entries",
+        "isbn",
         "language",
-        "category",
         "subjects",
-        "tags",
         "call_number",
         "cover_text",
         "notes",
-        "cover_url"
-      ].reduce((acc, id) => {
-        acc[id] = document.getElementById(id);
+        "cover_url",
+        "volume",
+        "category",
+        "tags"
+      ];
+
+      const fields = BOOK_FIELD_IDS.reduce((acc, id) => {
+        const el = document.getElementById(id);
+        if (el) acc[id] = el;
         return acc;
       }, {});
       const editingIdInput = document.getElementById("editing_id");
 
       const EXPORT_PROFILES = {
+        aacr2: {
+          label: "ای.ای.سی.آر.2",
+          ext: "csv",
+          headers: [
+            "سرشناسه (100)",
+            "عنوان اصلی (245$a)",
+            "عنوان فرعی (245$b)",
+            "عنوان برابر (246)",
+            "شرح پدیدآور (245$c)",
+            "نویسنده",
+            "مترجم",
+            "ویراستار",
+            "تصویرگر",
+            "گردآورنده",
+            "ویرایش (250)",
+            "محل نشر (260$a)",
+            "ناشر (260$b)",
+            "سال نشر (260$c)",
+            "سال حقوق نشر",
+            "سال چاپ",
+            "مشخصات ظاهری (300$a)",
+            "ابعاد (300$c)",
+            "مواد همراه (300$e)",
+            "شماره جلد (245$n)",
+            "عنوان فروست (490)",
+            "شماره فروست",
+            "سرشناسه افزوده",
+            "ISBN (020)",
+            "زبان (041)",
+            "موضوع (650)",
+            "رده (082)",
+            "متن صفحات حقوقی",
+            "یادداشت (500)"
+          ],
+          map: (b) => [
+            b.main_entry,
+            b.title,
+            b.subtitle,
+            b.parallel_title,
+            b.creators,
+            b.authors,
+            b.translators,
+            b.editors,
+            b.illustrators,
+            b.compilers,
+            b.edition,
+            b.publication_place,
+            b.publisher,
+            b.publish_year,
+            b.copyright_date,
+            b.print_year,
+            b.extent || b.volume,
+            b.dimensions,
+            b.accompanying_material,
+            b.volume_number,
+            b.series_title,
+            b.series_number,
+            b.added_entries,
+            b.isbn,
+            b.language,
+            b.subjects,
+            b.call_number,
+            b.cover_text,
+            b.notes
+          ]
+        },
         simorgh: {
           label: "سیمرغ",
           ext: "csv",
           headers: [
+            "سرشناسه",
             "عنوان",
-            "زیرعنوان",
-            "پدیدآورنده",
+            "عنوان فرعی",
+            "شرح پدیدآور",
             "نویسنده",
             "مترجم",
             "ویراستار",
             "گردآورنده",
             "ناشر",
             "محل نشر",
-            "سال انتشار",
+            "سال نشر",
             "سال چاپ",
-            "نوبت چاپ",
-            "جلد",
-            "عنوان مجموعه",
+            "ویرایش",
+            "تعداد صفحات",
+            "عنوان فروست",
             "شماره ISBN",
             "زبان",
-            "دسته‌بندی",
             "موضوع",
-            "برچسب",
             "رده",
             "یادداشت"
           ],
           map: (b) => [
+            b.main_entry || b.authors,
             b.title,
             b.subtitle,
             b.creators,
@@ -753,13 +902,11 @@
             b.publish_year,
             b.print_year,
             b.edition,
-            b.volume,
+            b.extent || b.volume,
             b.series_title,
             b.isbn,
             b.language,
-            b.category,
             b.subjects,
-            b.tags,
             b.call_number,
             b.notes
           ]
@@ -798,30 +945,40 @@
           label: "MARC-Lite",
           ext: "csv",
           headers: [
+            "100$a_سرشناسه",
             "245$a_عنوان",
-            "245$b_زیرعنوان",
-            "100$a_نویسنده_اصلی",
-            "700$a_مترجم_ویراستار",
-            "260$b_ناشر",
-            "260$a_محل_نشر",
-            "260$c_سال_انتشار",
-            "020$a_ISBN",
+            "245$b_عنوان_فرعی",
+            "246$a_عنوان_برابر",
+            "245$c_شرح_پدیدآور",
             "250$a_ویرایش",
+            "260$a_محل_نشر",
+            "260$b_ناشر",
+            "260$c_سال_نشر",
+            "300$a_مشخصات_ظاهری",
+            "300$c_ابعاد",
+            "300$e_مواد_همراه",
+            "490$a_فروست",
+            "020$a_ISBN",
             "041$a_زبان",
             "650$a_موضوع",
             "082$a_رده",
             "500$a_یادداشت"
           ],
           map: (b) => [
+            b.main_entry || b.authors,
             b.title,
             b.subtitle,
-            [b.authors, b.creators].filter(Boolean).join("; "),
-            [b.translators, b.editors, b.compilers].filter(Boolean).join("; "),
-            b.publisher,
-            b.publication_place,
-            b.publish_year,
-            b.isbn,
+            b.parallel_title,
+            b.creators || [b.authors, b.translators, b.compilers].filter(Boolean).join("; "),
             b.edition,
+            b.publication_place,
+            b.publisher,
+            b.publish_year,
+            b.extent || b.volume,
+            b.dimensions,
+            b.accompanying_material,
+            [b.series_title, b.series_number].filter(Boolean).join(" ؛ "),
+            b.isbn,
             b.language,
             b.subjects,
             b.call_number,
@@ -833,62 +990,54 @@
           ext: "csv",
           headers: [
             "id",
-            "title",
-            "subtitle",
-            "creators",
-            "authors",
-            "translators",
-            "editors",
-            "illustrators",
-            "compilers",
-            "isbn",
-            "publisher",
-            "publication_place",
-            "publish_year",
-            "print_year",
-            "edition",
-            "volume",
-            "series_title",
-            "language",
-            "category",
-            "subjects",
-            "tags",
-            "call_number",
-            "cover_text",
-            "notes",
-            "cover_url",
+            ...BOOK_FIELD_IDS.filter((id) => id !== "cover_url"),
             "created_at"
           ],
           map: (b) => [
             b.id,
-            b.title,
-            b.subtitle,
-            b.creators,
-            b.authors,
-            b.translators,
-            b.editors,
-            b.illustrators,
-            b.compilers,
-            b.isbn,
-            b.publisher,
-            b.publication_place,
-            b.publish_year,
-            b.print_year,
-            b.edition,
-            b.volume,
-            b.series_title,
-            b.language,
-            b.category,
-            b.subjects,
-            b.tags,
-            b.call_number,
-            b.cover_text,
-            b.notes,
-            b.cover_url,
-            b.created_at
+            ...BOOK_FIELD_IDS.filter((id) => id !== "cover_url").map((id) => b[id] ?? "")
           ]
         }
       };
+
+      function normalizeStoredBook(book) {
+        if (!book || typeof book !== "object") return book;
+        return {
+          ...book,
+          main_entry: book.main_entry || book.authors || "",
+          extent: book.extent || book.volume || "",
+          volume_number: book.volume_number || "",
+          parallel_title: book.parallel_title || "",
+          copyright_date: book.copyright_date || "",
+          dimensions: book.dimensions || "",
+          accompanying_material: book.accompanying_material || "",
+          series_number: book.series_number || "",
+          added_entries: book.added_entries || ""
+        };
+      }
+
+      function sanitizeFormValue(value, maxLen = 220) {
+        let text = `${value ?? ""}`.trim();
+        if (!text) return "";
+        if (
+          /"choices"\s*:\s*\[/.test(text) ||
+          /chat\.completion/.test(text) ||
+          /finish_reason/.test(text) ||
+          /prompt_tokens/.test(text)
+        ) {
+          return "";
+        }
+        text = text.split(/\n|\*|"refusal"/)[0].replace(/\s{2,}/g, " ").trim();
+        if (text.length > maxLen) text = text.slice(0, maxLen).trim();
+        return text;
+      }
+
+      function fillFormFromParsed(parsed) {
+        const data = normalizeStoredBook(parsed);
+        for (const id of BOOK_FIELD_IDS) {
+          if (fields[id]) fields[id].value = sanitizeFormValue(data[id] || "");
+        }
+      }
 
       function normalizeIsbn(value) {
         return `${value ?? ""}`.replace(/[\s\-]/g, "").toUpperCase();
@@ -918,7 +1067,7 @@
         const items = await listLocalBooks();
         const isbn = normalizeIsbn(payload.isbn);
         const titleKey = normalizeTextKey(payload.title);
-        const authorKey = normalizeTextKey(payload.authors || payload.creators);
+        const authorKey = normalizeTextKey(payload.main_entry || payload.authors || payload.creators);
 
         for (const item of items) {
           if (excludeId && Number(item.id) === Number(excludeId)) continue;
@@ -932,7 +1081,7 @@
           }
 
           const itemTitle = normalizeTextKey(item.title);
-          const itemAuthor = normalizeTextKey(item.authors || item.creators);
+          const itemAuthor = normalizeTextKey(item.main_entry || item.authors || item.creators);
           if (titleKey && itemTitle && titleKey === itemTitle) {
             if (!authorKey || !itemAuthor || authorKey === itemAuthor) {
               return {
@@ -970,7 +1119,7 @@
           const store = tx.objectStore(STORE_NAME);
           const req = store.getAll();
           req.onsuccess = () => {
-            const items = (req.result || []).sort((a, b) => Number(b.id) - Number(a.id));
+            const items = (req.result || []).map(normalizeStoredBook).sort((a, b) => Number(b.id) - Number(a.id));
             resolve(items);
           };
           req.onerror = () => reject(req.error);
@@ -1076,29 +1225,7 @@
           const res = await fetch("/api/scan", { method: "POST", body: fd });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || "scan failed");
-          fields.title.value = data.parsed?.title || "";
-          fields.subtitle.value = data.parsed?.subtitle || "";
-          fields.creators.value = data.parsed?.creators || "";
-          fields.authors.value = data.parsed?.authors || "";
-          fields.translators.value = data.parsed?.translators || "";
-          fields.editors.value = data.parsed?.editors || "";
-          fields.illustrators.value = data.parsed?.illustrators || "";
-          fields.compilers.value = data.parsed?.compilers || "";
-          fields.isbn.value = data.parsed?.isbn || "";
-          fields.publisher.value = data.parsed?.publisher || "";
-          fields.publication_place.value = data.parsed?.publication_place || "";
-          fields.publish_year.value = data.parsed?.publish_year || "";
-          fields.print_year.value = data.parsed?.print_year || "";
-          fields.edition.value = data.parsed?.edition || "";
-          fields.volume.value = data.parsed?.volume || "";
-          fields.series_title.value = data.parsed?.series_title || "";
-          fields.language.value = data.parsed?.language || "";
-          fields.category.value = data.parsed?.category || "";
-          fields.subjects.value = data.parsed?.subjects || "";
-          fields.tags.value = data.parsed?.tags || "";
-          fields.call_number.value = data.parsed?.call_number || "";
-          fields.cover_text.value = data.parsed?.cover_text || "";
-          fields.notes.value = data.parsed?.notes || "";
+          fillFormFromParsed(data.parsed || {});
           fields.cover_url.value = data.coverUrl || "";
           rawText.textContent = data.extractedText || "";
           const modelHint = buildModelHint(data.models);
@@ -1124,30 +1251,7 @@
         submitBtn.textContent = "ثبت تغییرات";
         formModeChip.textContent = `حالت ویرایش رکورد #${book.id}`;
         cancelEditBtn.style.display = "inline-block";
-        fields.title.value = book.title || "";
-        fields.subtitle.value = book.subtitle || "";
-        fields.creators.value = book.creators || "";
-        fields.authors.value = book.authors || "";
-        fields.translators.value = book.translators || "";
-        fields.editors.value = book.editors || "";
-        fields.illustrators.value = book.illustrators || "";
-        fields.compilers.value = book.compilers || "";
-        fields.isbn.value = book.isbn || "";
-        fields.publisher.value = book.publisher || "";
-        fields.publication_place.value = book.publication_place || "";
-        fields.publish_year.value = book.publish_year || "";
-        fields.print_year.value = book.print_year || "";
-        fields.edition.value = book.edition || "";
-        fields.volume.value = book.volume || "";
-        fields.series_title.value = book.series_title || "";
-        fields.language.value = book.language || "";
-        fields.category.value = book.category || "";
-        fields.subjects.value = book.subjects || "";
-        fields.tags.value = book.tags || "";
-        fields.call_number.value = book.call_number || "";
-        fields.cover_text.value = book.cover_text || "";
-        fields.notes.value = book.notes || "";
-        fields.cover_url.value = book.cover_url || "";
+        fillFormFromParsed(book);
         activateSection("formSection");
       }
 
@@ -1255,8 +1359,8 @@
 
       async function exportLocalCsv() {
         const items = await listLocalBooks();
-        const profileKey = exportProfileSelect.value || "simorgh";
-        const profile = EXPORT_PROFILES[profileKey] || EXPORT_PROFILES.simorgh;
+        const profileKey = exportProfileSelect.value || "aacr2";
+        const profile = EXPORT_PROFILES[profileKey] || EXPORT_PROFILES.aacr2;
         const rows = [profile.headers.join(",")];
         for (const item of items) {
           rows.push(profile.map(item).map((v) => csvEscape(v)).join(","));
@@ -1302,7 +1406,7 @@
           tr.innerHTML = `
             <td>${coverCell}</td>
             <td>${book.title || ""}</td>
-            <td>${book.creators || book.authors || ""}</td>
+            <td>${book.main_entry || book.authors || book.creators || ""}</td>
             <td>${book.publisher || ""}</td>
             <td>${book.publish_year || ""}</td>
             <td>${book.isbn || ""}</td>
@@ -1324,7 +1428,7 @@
             ${coverHtml}
             <h4>${book.title || "بدون عنوان"}</h4>
             <div class="meta">
-              ${book.authors || book.creators ? `نویسنده: ${book.authors || book.creators}<br />` : ""}
+              ${book.main_entry || book.authors || book.creators ? `سرشناسه: ${book.main_entry || book.authors || book.creators}<br />` : ""}
               ${book.publisher ? `ناشر: ${book.publisher}<br />` : ""}
               ${book.publish_year ? `سال: ${book.publish_year}<br />` : ""}
               ${book.isbn ? `ISBN: ${book.isbn}` : ""}
