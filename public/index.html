@@ -1027,7 +1027,16 @@
         ) {
           return "";
         }
-        text = text.replace(/\s*\|\s*[a-z]\s*$/i, "").trim();
+        text = text
+          .replace(/^(top line|large title|small title)\s*[:：]\s*/i, "")
+          .replace(/\s*\((?:Author|Editor|Translator)[^)]*$/i, "")
+          .replace(/\s*->.*$/i, "")
+          .replace(/\s*\|\s*[a-z]\s*$/i, "")
+          .trim();
+        const bilingual = text.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
+        if (bilingual && /[\u0600-\u06FF]/.test(bilingual[1]) && /[A-Za-z]/.test(bilingual[2])) {
+          text = bilingual[1].trim();
+        }
         if (
           /^(fa\|en\|unknown|visible_text_lines|confidence_notes)$/i.test(text) ||
           /^_[a-z_]+$/i.test(text) ||

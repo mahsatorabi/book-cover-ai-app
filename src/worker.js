@@ -681,8 +681,100 @@ function stripFieldNoise(value) {
     .trim();
 }
 
-function sanitizeFieldValue(value, maxLen = 220) {
+const LAYOUT_PREFIX_RX =
+  /^(top line|large title|small title|bottom line|middle section|top section|bottom section|header|footer|line\s*\d+)\s*[:：]\s*/i;
+
+function splitBilingualText(text) {
+  let cleaned = cleanField(text).replace(LAYOUT_PREFIX_RX, "").trim();
+  cleaned = cleaned.replace(/\s*->\s*actually.*$/i, "").replace(/\s*->.*$/i, "").trim();
+
+  const full = cleaned.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
+  if (full) {
+    const primary = full[1].trim();
+    const secondary = full[2].trim();
+    if (/[\u0600-\u06FF]/.test(primary) && /[A-Za-z]/.test(secondary)) {
+      return {
+        fa: primary,
+        en: secondary
+          .replace(/^(author|editor|translator|compiler|illustrator)\s*[:：]\s*/i, "")
+          .trim()
+      };
+    }
+  }
+
+  const truncated = cleaned.match(
+    /^(.+?)\s*\((?:Author|Editor|Translator|Compiler|Illustrator)\s*[:：]\s*([^)-]+)/i
+  );
+  if (truncated) {
+    return { fa: truncated[1].trim(), en: truncated[2].trim() };
+  }
+
+  cleaned = cleaned
+    .replace(/\s*\((?:Author|Editor|Translator|Compiler|Illustrator)[^)]*$/i, "")
+    .replace(/\s*-\s*$/, "")
+    .trim();
+
+  return { fa: cleaned, en: "" };
+}
+
+function normalizeExtractedText(value, fieldKey) {
   let text = stripFieldNoise(value);
+  if (!text) return { text: "", parallel: "" };
+
+  text = text
+    .replace(LAYOUT_PREFIX_RX, "")
+    .replace(/\(print edition[^)]*\)/gi, "")
+    .replace(/\[something\]/gi, "")
+    .replace(/\s*->\s*actually.*$/i, "")
+    .replace(/\s*->.*$/i, "")
+    .trim();
+
+  if (fieldKey === "cover_text") {
+    return {
+      text: text
+        .split(/\n/)
+        .map((line) => line.replace(LAYOUT_PREFIX_RX, "").trim())
+        .filter(Boolean)
+        .join("\n"),
+      parallel: ""
+    };
+  }
+
+  const { fa, en } = splitBilingualText(text);
+
+  if (fieldKey === "parallel_title") {
+    return { text: en || fa, parallel: "" };
+  }
+
+  const persianPrimaryFields = new Set([
+    "main_entry",
+    "title",
+    "subtitle",
+    "authors",
+    "editors",
+    "translators",
+    "compilers",
+    "illustrators",
+    "creators",
+    "edition",
+    "publisher",
+    "publication_place",
+    "extent",
+    "subjects",
+    "added_entries",
+    "call_number"
+  ]);
+
+  if (persianPrimaryFields.has(fieldKey)) {
+    return { text: fa, parallel: en };
+  }
+
+  return { text: fa || text, parallel: en };
+}
+
+function sanitizeFieldValue(value, maxLen = 220, fieldKey = "") {
+  const normalized = normalizeExtractedText(value, fieldKey);
+  let text = normalized.text;
   if (!text || isGarbageField(text) || isPlaceholderValue(text)) return "";
   text = text
     .split(/\n|\*|"refusal"|"\s*,\s*"role"|"\s*,\s*"tool_calls"/)[0]
@@ -728,12 +820,20 @@ function sanitizeBookRecord(book) {
     notes: 300
   };
   const out = {};
+  const parallels = [];
   for (const key of AACR2_BOOK_FIELDS) {
-    let value = sanitizeFieldValue(book[key], limits[key] || 220);
+    const normalized = normalizeExtractedText(book[key], key);
+    let value = sanitizeFieldValue(book[key], limits[key] || 220, key);
+    if (normalized.parallel && key !== "parallel_title") {
+      parallels.push(normalized.parallel);
+    }
     if (key === "language" && value && !isValidLanguageCode(value)) {
       value = "";
     }
     out[key] = value;
+  }
+  if (!out.parallel_title && parallels.length) {
+    out.parallel_title = sanitizeFieldValue(parallels.join(" / "), limits.parallel_title, "parallel_title");
   }
   normalizePublicationFields(out);
   return out;
@@ -817,12 +917,12 @@ function mapPayloadToBook(payload) {
   const normalized = normalizeBookPayload(payload);
   const book = {};
   for (const key of AACR2_BOOK_FIELDS) {
-    book[key] = sanitizeFieldValue(normalized[key]);
+    book[key] = cleanField(normalized[key]);
   }
-  if (!book.main_entry) book.main_entry = sanitizeFieldValue(normalized.authors);
-  if (!book.extent) book.extent = sanitizeFieldValue(normalized.volume);
+  if (!book.main_entry) book.main_entry = cleanField(normalized.authors);
+  if (!book.extent) book.extent = cleanField(normalized.volume);
   if (!book.creators) {
-    book.creators = sanitizeFieldValue(normalized.statement_of_responsibility);
+    book.creators = cleanField(normalized.statement_of_responsibility);
   }
   return book;
 }
@@ -830,8 +930,7 @@ function mapPayloadToBook(payload) {
 function mergeBookFields(primary, fallback) {
   const merged = {};
   for (const key of AACR2_BOOK_FIELDS) {
-    merged[key] =
-      sanitizeFieldValue(primary[key]) || sanitizeFieldValue(fallback[key]) || "";
+    merged[key] = cleanField(primary[key]) || cleanField(fallback[key]) || "";
   }
   return merged;
 }
@@ -1005,7 +1104,7 @@ function parsePersianCipRecord(lines = []) {
   if (result.translators) creatorParts.push(`مترجم: ${result.translators}`);
   if (creatorParts.length) result.creators = creatorParts.join("؛ ");
 
-  return sanitizeBookRecord(result);
+  return result;
 }
 
 function inferFieldsFromVisibleLines(lines = []) {
@@ -1154,7 +1253,7 @@ function inferFieldsFromVisibleLines(lines = []) {
     }
   }
 
-  return sanitizeBookRecord(result);
+  return result;
 }
 
 function pickLabeledValue(line, labels) {
@@ -1335,7 +1434,9 @@ function buildCoverLinesPrompt() {
     ].join("\n"),
     user: [
       "مرحله ۱: فقط خطوط صفحات حقوقی/فیپا را استخراج کن.",
-      "هر خط فقط یک برچسب و مقدار کوتاه داشته باشد.",
+      "فقط متن فارسیِ روی صفحه را در فیلدهای اصلی بنویس.",
+      "ترجمه انگلیسی فقط اگر واقعا چاپ شده؛ در غیر این صورت ننویس.",
+      "پیشوند توضیحی مثل Top line یا Large title ننویس.",
       'خروجی فقط این ساختار باشد: {"language":"fa|en|unknown","visible_text_lines":["...", "..."],"confidence_notes":"..."}'
     ].join(" ")
   };
@@ -1362,7 +1463,9 @@ function buildStructuredPrompt(visibleLines) {
       "extent = تعداد صفحات یا مشخصات ظاهری (300$a). dimensions = ابعاد (300$c). accompanying_material = مواد همراه (300$e).",
       "volume_number = شماره جلد (245$n). series_title/series_number = فروست (490).",
       "added_entries = سرشناسه‌های افزوده. isbn = شابک (020). subjects = موضوع (650). call_number = رده (082).",
-      "cover_text = خلاصه متن صفحات حقوقی. notes فقط توضیح اختیاری.",
+      "فیلدهای اصلی فقط فارسی باشند.",
+      "parallel_title فقط برای عنوان برابر انگلیسیِ چاپ‌شده روی صفحه.",
+      "پیشوند توضیحی مثل Top line، Large title، Author: ننویس.",
       `خروجی فقط این ساختار باشد: ${AACR2_STRUCTURED_JSON}`,
       "",
       "LINES:",
