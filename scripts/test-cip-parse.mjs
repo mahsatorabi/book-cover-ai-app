@@ -40,6 +40,20 @@ const catalogLines = mod.extractCatalogLines(sampleReasoning, []);
 const parsed = mod.parsePersianCipRecord(catalogLines);
 const fromJson = mod.parseBookJson(apiGarbage, catalogLines);
 
+const garbagePayload = JSON.stringify({
+  language: "fa|en|unknown",
+  visible_text_lines: ["visible_text_lines"],
+  title: "fa|en|unknown",
+  subtitle: "visible_text_lines",
+  translators: "s",
+  extent: ". Follow AACR2 principles",
+  accompanying_material: "_material",
+  series_title: "_title | _number",
+  subjects: "s"
+});
+const fromGarbageOnly = mod.parseBookJson(garbagePayload, []);
+const fromGarbageWithCip = mod.parseBookJson(garbagePayload, catalogLines);
+
 const checks = [
   ["main_entry", parsed.main_entry, "دبب، بهنام، ۱۳۷۸"],
   ["title", parsed.title, "کلنبه باغ شاعران"],
@@ -51,7 +65,12 @@ const checks = [
   ["extent", parsed.extent.includes("۳۶"), true],
   ["isbn present", Boolean(parsed.isbn), true],
   ["no garbage in title", mod.isGarbageField(fromJson.title), false],
-  ["publish_year not birth year", parsed.publish_year !== "1378", true]
+  ["publish_year not birth year", parsed.publish_year !== "1378", true],
+  ["reject schema-only title", fromGarbageOnly.title, ""],
+  ["reject schema-only subtitle", fromGarbageOnly.subtitle, ""],
+  ["reject prompt extent from schema", fromGarbageOnly.extent, ""],
+  ["reject single-letter translator", fromGarbageOnly.translators, ""],
+  ["cip title kept over garbage", fromGarbageWithCip.title, parsed.title]
 ];
 
 let failed = 0;

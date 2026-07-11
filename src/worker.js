@@ -614,15 +614,83 @@ function isGarbageField(value) {
   );
 }
 
+const SCHEMA_FIELD_NAMES = new Set([
+  "main_entry",
+  "title",
+  "subtitle",
+  "parallel_title",
+  "creators",
+  "authors",
+  "translators",
+  "editors",
+  "illustrators",
+  "compilers",
+  "edition",
+  "publication_place",
+  "publisher",
+  "publish_year",
+  "copyright_date",
+  "print_year",
+  "extent",
+  "dimensions",
+  "accompanying_material",
+  "volume_number",
+  "series_title",
+  "series_number",
+  "added_entries",
+  "language",
+  "subjects",
+  "call_number",
+  "cover_text",
+  "notes",
+  "visible_text_lines",
+  "confidence_notes",
+  "statement_of_responsibility"
+]);
+
+function isPlaceholderValue(value) {
+  const text = cleanField(value);
+  if (!text) return true;
+  const lower = text.toLowerCase();
+
+  if (text.length <= 2 && !/[۰-۹0-9]{2}/.test(text) && !/^(fa|en)$/i.test(lower)) return true;
+  if (/^(fa\|en\|unknown|fa|en|unknown|\.\.\.)$/i.test(lower)) return true;
+  if (SCHEMA_FIELD_NAMES.has(lower)) return true;
+  if (/^_[a-z_]+$/i.test(text)) return true;
+  if (/_title|_number|_material/i.test(text)) return true;
+  if (/follow aacr2|aacr2 principles|only extract|do not guess|valid json/i.test(lower)) {
+    return true;
+  }
+  if (/^مثلاً\s/.test(text)) return true;
+  if (/^مترجم،\s*ویراستار/.test(text)) return true;
+  if (/^\.\s/.test(text)) return true;
+  if (/\|\s*[a-z]$/i.test(text)) return true;
+
+  return false;
+}
+
+function isValidLanguageCode(value) {
+  const code = cleanField(value).toLowerCase();
+  return code === "fa" || code === "en" || code === "unknown";
+}
+
+function stripFieldNoise(value) {
+  return cleanField(value)
+    .replace(/\s*\|\s*[a-z]\s*$/i, "")
+    .replace(/\s*\|\s*$/g, "")
+    .trim();
+}
+
 function sanitizeFieldValue(value, maxLen = 220) {
-  let text = cleanField(value);
-  if (!text || isGarbageField(text)) return "";
+  let text = stripFieldNoise(value);
+  if (!text || isGarbageField(text) || isPlaceholderValue(text)) return "";
   text = text
     .split(/\n|\*|"refusal"|"\s*,\s*"role"|"\s*,\s*"tool_calls"/)[0]
     .replace(/\s{2,}/g, " ")
     .replace(/^\*+\s*/, "")
     .trim();
   text = text.replace(/[.;،]\s*$/, "").trim();
+  if (isPlaceholderValue(text)) return "";
   if (text.length > maxLen) text = text.slice(0, maxLen).trim();
   return text;
 }
@@ -661,8 +729,13 @@ function sanitizeBookRecord(book) {
   };
   const out = {};
   for (const key of AACR2_BOOK_FIELDS) {
-    out[key] = sanitizeFieldValue(book[key], limits[key] || 220);
+    let value = sanitizeFieldValue(book[key], limits[key] || 220);
+    if (key === "language" && value && !isValidLanguageCode(value)) {
+      value = "";
+    }
+    out[key] = value;
   }
+  normalizePublicationFields(out);
   return out;
 }
 
@@ -730,6 +803,13 @@ function extractStructuredPayload(text) {
   if (parsed.stage2_structured && typeof parsed.stage2_structured === "object") {
     return parsed.stage2_structured;
   }
+  const keys = Object.keys(parsed);
+  if (
+    keys.length > 0 &&
+    keys.every((key) => ["language", "visible_text_lines", "confidence_notes"].includes(key))
+  ) {
+    return {};
+  }
   return parsed;
 }
 
@@ -770,21 +850,67 @@ function extractCatalogLines(text, visibleLines = []) {
       if (cleaned) lines.push(cleaned);
     }
   }
-  for (const match of raw.matchAll(/"([^"\n]{4,220})"/g)) {
-    const cleaned = cleanCatalogLine(match[1]);
-    if (cleaned) lines.push(cleaned);
-  }
   for (const match of raw.matchAll(/(?:^|\n)\s*[*•-]\s*(.+?)(?=\n|$)/g)) {
     const cleaned = cleanCatalogLine(match[1]);
     if (cleaned) lines.push(cleaned);
   }
   for (const match of raw.matchAll(
-    /(سرشناسه|عنوان و نام پدیدآور|عنوان|گردآورنده|مشخصات نشر|مشخصات ظاهری|موضوع|شناسه افزوده|رده بندی کنگره|رده بندی دیویی|شماره کتابشناسی ملی|شابک|ISBN|نوبت چاپ|ویراستار|مترجم)\s*[:：]\s*(.+?)(?=\n|$)/gi
+    /(سرشناسه|عنوان و نام پدیدآور|عنوان|گردآورنده|مشخصات نشر|مشخصات ظاهری|موضوع|شناسه افزوده|رده بندی کنگره|رده بندی دیویی|شماره کتابشناسی ملی|شابک|ISBN|نوبت چاپ|ویراستار|مترجم|مدیر مسئول نشر|ناشر|تهران)\s*[:：]?\s*(.+?)(?=\n|$)/gi
   )) {
-    const cleaned = cleanCatalogLine(`${match[1]}: ${match[2]}`);
+    const label = match[1];
+    const value = match[2];
+    const cleaned = cleanCatalogLine(
+      label === "تهران" ? `مشخصات نشر: ${label}: ${value}` : `${label}: ${value}`
+    );
     if (cleaned) lines.push(cleaned);
   }
-  return [...new Set(lines)];
+  return [...new Set(lines)].filter(looksLikeCatalogLine);
+}
+
+function looksLikeCatalogLine(line) {
+  const text = cleanField(line);
+  if (!text || isGarbageField(text) || isPlaceholderValue(text)) return false;
+  if (/[\u0600-\u06FF]/.test(text)) return true;
+  return /^(سرشناسه|عنوان|ISBN|شابک|موضوع|نوبت چاپ)/i.test(text);
+}
+
+function normalizePublicationFields(book) {
+  if (book.publication_place && /[:：]/.test(book.publication_place)) {
+    const pubMatch = book.publication_place.match(
+      /^(.+?)[:：]\s*(?:نشر\s*)?(.+?)(?:[،,]\s*([۰-۹0-9]{4}))?.*$/
+    );
+    if (pubMatch) {
+      book.publication_place = sanitizeFieldValue(pubMatch[1]);
+      if (!book.publisher) {
+        book.publisher = sanitizeFieldValue(pubMatch[2].replace(/^نشر\s*/, ""));
+      }
+      if (!book.publish_year && pubMatch[3]) {
+        book.publish_year = toEnglishDigits(pubMatch[3]);
+      }
+    }
+  }
+
+  if (book.publisher) {
+    let publisher = book.publisher;
+    if (publisher.includes("|")) {
+      const parts = publisher.split("|").map((part) => part.trim()).filter(Boolean);
+      publisher =
+        parts.find((part) => /(متخصصان|انتشارات|نشر|موسسه|مؤسسه)/.test(part)) ||
+        parts[parts.length - 1];
+    }
+    publisher = publisher
+      .replace(/^نشر\s*/, "")
+      .replace(/[،,]\s*[۰-۹0-9]{4}.*$/, "")
+      .trim();
+    if (!/(متخصصان|انتشارات|نشر|موسسه|مؤسسه)/.test(publisher) && book.publication_place) {
+      publisher = "";
+    }
+    book.publisher = sanitizeFieldValue(publisher);
+  }
+
+  if (book.publisher && /خضرا|مدیر مسئول/i.test(book.publisher)) {
+    book.publisher = "";
+  }
 }
 
 function cleanCatalogLine(line) {
@@ -869,6 +995,7 @@ function parsePersianCipRecord(lines = []) {
   }
 
   if (!result.isbn) result.isbn = findIsbn(allText);
+  if (!result.authors && result.main_entry) result.authors = result.main_entry;
   if (!result.language && /[\u0600-\u06FF]/.test(allText)) result.language = "fa";
 
   const creatorParts = [];
@@ -1056,7 +1183,7 @@ function looksLikePersonName(line) {
 
 function appendUnique(current, next) {
   const value = sanitizeFieldValue(next);
-  if (!value) return sanitizeFieldValue(current);
+  if (!value || isPlaceholderValue(value)) return sanitizeFieldValue(current);
   const base = sanitizeFieldValue(current);
   if (!base) return value;
   if (base.includes(value)) return base;
